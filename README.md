@@ -1,14 +1,11 @@
-# example-ecr-images
-Python Script for Ingesting ECR Images in Port
-
-## Getting started
+# Getting started
 In this example, you will create blueprints for `ecrImage` and `ecrRepository` that ingests images and repositories from ECR into Port. You will then use a Python script to make API calls to AWS ECR REST API to fetch the data from your account.
 
-### Blueprints
+## Blueprints
 Create the following blueprints in Port using the schemas:
 
 
-#### Repository
+### Repository
 ```json
 {
   "identifier": "ecrRepository",
@@ -17,32 +14,27 @@ Create the following blueprints in Port using the schemas:
   "icon": "AWS",
   "schema": {
     "properties": {
-        "name": {
-            "type": "string",
-            "title": "Repository Name",
-            "description": "The name of the repository",
-        },
-        "registryId": {
-            "type": "string",
-            "title": "Registry ID",
-            "description": "The ID of the registry",
-        },
+      "registryId": {
+        "type": "string",
+        "title": "Registry ID",
+        "description": "The ID of the registry"
+      },
       "arn": {
         "type": "string",
         "title": "Repository ARN",
-        "description": "The ARN of the repository",
+        "description": "The ARN of the repository"
       },
       "uri": {
         "type": "string",
         "title": "Repository URI",
-        "description": "The URI of the repository",
+        "description": "The URI of the repository"
       },
-        "createdAt": {
-            "type": "string",
-            "title": "Created At",
-            "description": "Date and time the repository was created",
-            "format": "date-time"
-        },
+      "createdAt": {
+        "type": "string",
+        "title": "Created At",
+        "description": "Date and time the repository was created",
+        "format": "date-time"
+      },
       "imageTagMutability": {
         "type": "string",
         "title": "Image Tag Mutability",
@@ -52,14 +44,14 @@ Create the following blueprints in Port using the schemas:
           "IMMUTABLE"
         ],
         "enumColors": {
-            "MUTABLE": "green",
-            "IMMUTABLE": "darkGray"
+          "MUTABLE": "green",
+          "IMMUTABLE": "darkGray"
         }
       },
       "configurationScanOnPush": {
         "type": "boolean",
         "title": "Configuration Scan on Push",
-        "description": "Image scanning configuration when pushing images to this repository",
+        "description": "Image scanning configuration when pushing images to this repository"
       },
       "encryptionType": {
         "type": "string",
@@ -70,14 +62,14 @@ Create the following blueprints in Port using the schemas:
           "KMS"
         ],
         "enumColors": {
-            "AES256": "green",
-            "KMS": "blue"
+          "AES256": "green",
+          "KMS": "blue"
         }
       },
       "kmsKey": {
         "type": "string",
         "title": "KMS Key",
-        "description": "The KMS key used for encryption",
+        "description": "The KMS key used for encryption"
       }
     },
     "required": []
@@ -89,7 +81,7 @@ Create the following blueprints in Port using the schemas:
 }
 ```
 
-#### Image
+### Image
 ```json
 {
   "identifier": "ecrImage",
@@ -158,7 +150,7 @@ Create the following blueprints in Port using the schemas:
 }
 ```
 
-### Running the Python script
+## Running the Python script
 First clone the repository and cd into the work directory with:
 ```bash
 $ git clone git@github.com:port-labs/example-ecr-images.git

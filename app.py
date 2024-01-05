@@ -33,6 +33,8 @@ access_token = token_response.json()["accessToken"]
 # You can now use the value in access_token when making further requests
 headers = {"Authorization": f"Bearer {access_token}"}
 
+client = boto3.client("ecr", region_name=AWS_DEFAULT_REGION)
+
 
 async def add_entity_to_port(
     session: aiohttp.ClientSession, blueprint_id, entity_object
@@ -64,9 +66,6 @@ async def add_entity_to_port(
     if not response.ok:
         logger.info("Ingesting {blueprint_id} entity to port failed, skipping...")
     logger.info(f"Added entity to Port: {entity_object}")
-
-
-client = boto3.client("ecr", region_name=AWS_DEFAULT_REGION)
 
 
 async def get_all_repositories(session: aiohttp.ClientSession):
@@ -144,7 +143,6 @@ async def ingest_ecr_repositories(
         kms_key = encryption_configuration.get("kmsKey")
 
     repository_object = {
-        "name": repository["repositoryName"],
         "registryId": repository["registryId"],
         "arn": repository["repositoryArn"],
         "uri": repository["repositoryUri"],
@@ -157,7 +155,7 @@ async def ingest_ecr_repositories(
         "kmsKey": kms_key,
     }
     entity_object = {
-        "identifier": repository_object["name"],
+        "identifier": repository["repositoryName"],
         "title": repository_object["name"],
         "properties": {**repository_object},
     }
