@@ -137,7 +137,7 @@ async def ingest_ecr_repositories(
     encryption_type = None
     kms_key = None
     encryption_configuration = repository.get("encryptionConfiguration")
-    logger.warning(f"Ingesting ECR repository: {repository['repositoryName']}")
+    logger.info(f"Ingesting ECR repository: {repository['repositoryName']}")
 
     if encryption_configuration:
         encryption_type = encryption_configuration.get("encryptionType")
