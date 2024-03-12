@@ -1,5 +1,6 @@
 import asyncio
-import logging
+from loguru import logger
+
 import os
 from typing import Any
 
@@ -10,7 +11,6 @@ import requests
 
 dotenv.load_dotenv()
 
-logger = logging.getLogger(__name__)
 
 PORT_API_URL = "https://api.getport.io/v1"
 PORT_CLIENT_ID = os.getenv("PORT_CLIENT_ID")
@@ -137,11 +137,11 @@ async def ingest_ecr_repositories(
     encryption_type = None
     kms_key = None
     encryption_configuration = repository.get("encryptionConfiguration")
+    logger.warning(f"Ingesting ECR repository: {repository['repositoryName']}")
 
     if encryption_configuration:
         encryption_type = encryption_configuration.get("encryptionType")
         kms_key = encryption_configuration.get("kmsKey")
-
     repository_object = {
         "registryId": repository["registryId"],
         "arn": repository["repositoryArn"],
@@ -156,7 +156,7 @@ async def ingest_ecr_repositories(
     }
     entity_object = {
         "identifier": repository["repositoryName"],
-        "title": repository_object["name"],
+        "title": repository["repositoryName"],
         "properties": {**repository_object},
     }
 
@@ -168,24 +168,29 @@ async def ingest_ecr_images(session: aiohttp.ClientSession, image: dict[str, Any
     if last_recorded_pull_time:
         last_recorded_pull_time = last_recorded_pull_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    entity_object = {
-        "identifier": image["imageDigest"],
-        "title": image["imageDigest"],
-        "properties": {
-            "registryId": image["registryId"],
-            "digest": image["imageDigest"],
-            "tags": image["imageTags"],
-            "size": image["imageSizeInBytes"],
-            "pushedAt": image["imagePushedAt"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "manifestMediaType": image["imageManifestMediaType"],
-            "artifactMediaType": image["artifactMediaType"],
-            "lastRecordedPullTime": last_recorded_pull_time,
-        },
-        "relations": {
-            "repository": image["repositoryName"],
-        },
-    }
-    await add_entity_to_port(session, ECR_IMAGE_BLUEPRINT, entity_object)
+    # Extract image tags or assign a default tag if imageTags is empty
+    image_tags = image.get("imageTags", ["latest"])
+
+    for tag in image_tags:
+        entity_object = {
+            "identifier": f'{image["repositoryName"]}:{tag}',  # Construct identifier using repositoryName and tag
+            "title": f'{image["repositoryName"]}:{tag}',
+            "properties": {
+                "registryId": image["registryId"],
+                "digest": image["imageDigest"],
+                "tags": [tag],
+                "size": image["imageSizeInBytes"],
+                "pushedAt": image["imagePushedAt"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "manifestMediaType": image["imageManifestMediaType"],
+                "artifactMediaType": image.get("artifactMediaType"),
+                "lastRecordedPullTime": last_recorded_pull_time,
+            },
+            "relations": {
+                "repository": image["repositoryName"],
+            },
+        }
+        await add_entity_to_port(session, ECR_IMAGE_BLUEPRINT, entity_object)
+
 
 
 async def main():
